@@ -19,7 +19,7 @@ bintonic_parallel:	$(OFILES1)
 	$(CC) -o bintonic_parallel $(OFILES1) -lpthread
 
 mergeSort:	$(OFILES2)
-	$(CC) -o mergeSort $(OFILES2)
+	$(CC) -g -o mergeSort $(OFILES2)
 
 clean::
 	/bin/rm -f $(OFILES)
