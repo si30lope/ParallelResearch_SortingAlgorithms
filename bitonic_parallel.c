@@ -1,28 +1,3 @@
-/* File:     pth_bitonic.c
- *
- * Purpose:  Implement bitonic sort of a list of ints using Pthreads
- *
- * Compile:  gcc -g -Wall -o pth_bitonic pth_bitonic.c -lpthread
- * Run:      ./pth_bitonic <thread count> <n> [g] [o]
- *           n = number of ints in the list 
- *           If 'g' is included on the command line, the program
- *              will use a random number generator to generate
- *              the list to be sorted.
- *           If 'o' is included on the command line, the program
- *              will print the original list and the sorted list
- *
- * Input:    If 'g' is not on the command line, user should enter
- *           the elements of the list
- *           
- * Output:   If 'o' is included on the command line, the original
- *           list and the sorted list.  
- *           The elapsed time for the sort.
- *
- * Notes:
- * 1.  thread_count should be a power of 2
- * 2.  n = list_size should be evenly divisible by thread_count
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -38,6 +13,9 @@ int *list1, *list2;
 int *l_a, *l_b;
 
 int* randomNumberGenerator();
+int* ascNumberGenerator();
+int* desNumberGenerator();
+int* arbNumberGenerator();
 void printer(char title[], int list[], double time);
 void *Bitonic_sort(void* rank);
 void Bitonic_sort_incr(int th_count, int dim, int my_first, int local_n,
@@ -53,27 +31,51 @@ void Barrier(void);
 void test(void);
 
 /*--------------------------------------------------------------------*/
+
+
 int main(int argc, char* argv[]) {
   long       thread;
   pthread_t* thread_handles; 
   double     start, finish;
   int        gen_list, output_list;
-
-  if(argc==3){
+  
+  int i=0;
+  int rc,t;
+  //printf("Argument Format: numthreads numElements [1]Ascending [2]Descending [3]Random [4]File\n");
+  if(argc==4){
     thread_count = atoi(argv[1]);
-    N= atol(argv[2]);
+    N= atoi(argv[2]);
+    t= atoi(argv[3]);
+    switch(t){
+      case 1:
+        list1=ascNumberGenerator();
+        break;
+      case 2:
+        list1=desNumberGenerator();
+        break;
+      case 3:
+        list1=randomNumberGenerator();
+        break;
+      case 4:
+        list1=arbNumberGenerator();
+    //    printf("The amount of numbers isin this file where %d\n",N);
+        break;
+    }    
+  }else if(argc==3){
+    thread_count = atoi(argv[1]);
+    N= atoi(argv[2]);
+    list1=randomNumberGenerator();
   }else{
     printf("\tBitonicSort Needs a Number Range or 8 by default\n");
     printf("\tWill be ran with one thread.\n");
     N=8;
     thread_count=1;
-  }
-
+    list1=randomNumberGenerator();
+  }  
   thread_handles = malloc (thread_count*sizeof(pthread_t));
   pthread_mutex_init(&bar_mutex, NULL);
   pthread_cond_init(&bar_cond, NULL);
   
-  list1=randomNumberGenerator();
   list2 = malloc(N*sizeof(int));
   l_a = list1;
   l_b = list2;  
@@ -91,7 +93,8 @@ int main(int argc, char* argv[]) {
     pthread_join(thread_handles[thread], NULL);
   }
   gettimeofday(&endclock, NULL);
-  printer("The sorted list is", NULL, diffgettime(startclock, endclock));
+  //printer("The sorted list is", NULL, diffgettime(startclock, endclock));
+  printer(NULL, NULL, diffgettime(startclock, endclock));
 
   
   free(list1);
@@ -114,6 +117,53 @@ int * randomNumberGenerator(){
   return array;
 }
 
+
+
+
+int* ascNumberGenerator(){
+  int* array=malloc(sizeof(int)*N);
+  int i;
+  for(i=0;i<N;i++){
+    array[i]=i;
+  }
+  return array;
+}
+
+int* desNumberGenerator(){
+  int* array=malloc(sizeof(int)*N);
+  int i;
+  for(i=0;i<N;i++){
+    array[i]=N-i;
+  }
+  return array;
+}
+
+int* arbNumberGenerator(){
+  int* array=malloc(sizeof(int)*N);
+  FILE *fp;
+  char filename[40];
+  char ch;
+
+  printf("Enter the filename to be opened \n");
+  scanf("%s", filename);
+  /*  open the file for reading */
+  fp = fopen(filename, "r");
+  char buffer[500];
+  int lineno = 0;
+
+  while ( !feof(fp))
+  {
+    // read in the line and make sure it was successful
+    if (fgets(buffer,500,fp) != NULL)
+    {
+      printf("%d: %s\n",lineno++,buffer);
+      array[lineno-1]=atoi(buffer);
+    }
+  }
+  N=lineno;
+  return array;
+}
+
 void test() {
   int pass = 1;
   int i;
@@ -132,8 +182,9 @@ void test() {
  */
 void printer(char title[], int list[], double time) {
   int i;
-  
-  printf("%s:\n", title);
+  if(title!=NULL){
+    printf("%s:\n", title);
+  }
   if(list!=(int*)NULL){
     for (i = 0; i < N; i++){
        printf("%d ", list[i]);
@@ -143,7 +194,7 @@ void printer(char title[], int list[], double time) {
     test();
   }
   if(time){
-    printf("in %.5f seconds\n", time);
+    printf("in T%.5f\n", time);
   }else{
     printf("\n");
   }

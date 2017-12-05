@@ -38,7 +38,9 @@ void test() {
 void printer(char title[], int list[], double time) {
   int i;
   
-  printf("%s:\n", title);
+  if(title!=NULL){
+    printf("%s:\n", title);
+  }
   if(list!=(int*)NULL){
     for (i = 0; i < N; i++){
        printf("%d ", list[i]);
@@ -145,23 +147,86 @@ int* randomNumberGenerator(){
   return array;
 }
 
+int* ascNumberGenerator(){
+  int* array=malloc(sizeof(int)*N);
+  int i;
+  for(i=0;i<N;i++){
+    array[i]=i;
+  }
+  return array;
+}
+
+int* desNumberGenerator(){
+  int* array=malloc(sizeof(int)*N);
+  int i;
+  for(i=0;i<N;i++){
+    array[i]=N-i;
+  }
+  return array;
+}
+
+int* arbNumberGenerator(){
+  int* array=malloc(sizeof(int)*N);
+  FILE *fp;
+  char filename[40];
+  char ch;
+
+  printf("Enter the filename to be opened \n");
+  scanf("%s", filename);
+  /*  open the file for reading */
+  fp = fopen(filename, "r");
+  char buffer[500];
+  int lineno = 0;
+
+  while ( !feof(fp))
+  {
+    // read in the line and make sure it was successful
+    if (fgets(buffer,500,fp) != NULL)
+    {
+      printf("%d: %s\n",lineno++,buffer);
+      array[lineno-1]=atoi(buffer);
+    }
+  }
+  N=lineno;
+  return array;
+}
+
 /* The main program starts here */
 int main(int argc, char *argv[]) {
   int i=0;
-  int rc;
-  if(argc==3){
+  int rc,t;
+//  printf("Argument Format: numthreads numElements [1]Ascending [2]Descending [3]Random [4]File\n");
+  if(argc==4){
     thread_count = atoi(argv[1]);
     N= atoi(argv[2]);
+    t= atoi(argv[3]);
+    switch(t){
+      case 1:
+        a=ascNumberGenerator();
+        break;
+      case 2:
+        a=desNumberGenerator();
+        break;
+      case 3:
+        a=randomNumberGenerator();
+        break;
+      case 4:
+        a=arbNumberGenerator();
+        printf("The amount of numbers isin this file where %d\n",N);
+        break;
+    }
   }else{
     printf("\tMergeSort Needs a Number Range or 8 by default\n");
     printf("\tWill be ran with one thread.\n");
     N=8;
     thread_count=1;
+    a=randomNumberGenerator();
   }if(!((N != 0) && !(N & (N - 1)))){
-    printf("MergeSort Only works when Array Length is k^2\n");
+    //printf("MergeSort Only works when Array Length is k^2\n");
   }
-  a=randomNumberGenerator();
 
+  //printer("Unsorted Array: ", a,0);
+  
   thread=malloc(sizeof(pthread_t)*thread_count);
   pthread_setconcurrency(thread_count+1);
   pthread_mutex_init(&mutex, NULL);
@@ -175,7 +240,7 @@ int main(int argc, char *argv[]) {
 
   
   gettimeofday(&endclock, NULL);
-  printer("The sorted list is", NULL, diffgettime(startclock, endclock));
+  printer(NULL, NULL, diffgettime(startclock, endclock));
   pthread_mutex_destroy(&mutex);
   pthread_cond_destroy(&cond);
   free(thread);
