@@ -3,7 +3,10 @@
 #include <unistd.h>
 #include "timer.h"
 
-
+/*
+* This method is the processes of zipping up two
+* sorted arrays
+*/
 void merge(int arr[], int lower,int mid,int higher){
   int i,j,k;
   int size=mid-lower+1;
@@ -43,6 +46,10 @@ void merge(int arr[], int lower,int mid,int higher){
   }
 }
 
+/*
+* This method seperates the array into segements
+* recursively and merges them together
+*/
 void mergeSort(int arr[], int lower, int higher){
   int mid;
   if(lower<higher){
@@ -53,6 +60,9 @@ void mergeSort(int arr[], int lower, int higher){
   }
 }
 
+/*
+* Generates a array of random numbers
+*/
 int* randomNumberGenerator(int N){
   int* array=malloc(sizeof(int)*N);
   srand(time(NULL));   // should only be called once
@@ -77,6 +87,7 @@ int main(int argc, char *argv[]) {
 
   int* a=randomNumberGenerator(size);
   int i;
+  //Prints Unsorted Array
   /*
   printf("Unsorted Array\n");
   for(i=0;i<size;i++)
@@ -87,7 +98,7 @@ int main(int argc, char *argv[]) {
   struct timeval endclock;
   gettimeofday(&startclock, NULL);
   mergeSort(a, 0, size-1);
-
+  //Prints Sorted Array
 /*  printf("Sorted Array\n");
   for(i=0;i<size;i++)
     printf("%d \t",a[i]);
