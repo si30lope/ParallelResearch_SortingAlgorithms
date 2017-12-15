@@ -5,6 +5,10 @@
 
 void bitonicSort(int[],int,int,int);
 
+/**
+* This process is a recurssive funciton that swaps 
+* unsorted elements using a half array offset
+*/
 void merge(int a[],int low, int count, int left){
   if(count>1){
     int half= count/2;
@@ -21,6 +25,10 @@ void merge(int a[],int low, int count, int left){
   }
 }
 
+/*
+* This method is responsible for segmenting the array
+* into compnenets that can be sorted (typically in parallel)
+*/
 void bitonicSort(int a[], int low,int count, int left){
   if(count>1){
     int half= count/2;
@@ -52,6 +60,7 @@ int main(int argc, char *argv[]) {
      N=8;
   }
   
+  //Timing Setup
   struct timeval startclock;
   struct timeval endclock;
   gettimeofday(&startclock, NULL);
@@ -61,12 +70,15 @@ int main(int argc, char *argv[]) {
   if(((N != 0) && !(N & (N - 1)))){
     printf("BitonicSort Only works when Array Length is k^2");
   }
+  //Print the Unsorted
   printf("Unsorted Array\n");
   for(i=0;i<N;i++)
     printf("%d \t",a[i]);
   
+  //Begin the Process
   bitonicSort(a, 0, N,1);
   
+  //Print the Sorted
   printf("Sorted Array\n");
   for(i=0;i<N;i++)
     printf("%d \t",a[i]);
